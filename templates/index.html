@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deepfake Video Detection</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+    
+    <div class="container">
+        <h1 class="mt-5 text-center">Deepfake Video Detection</h1>
+        <p class="text-center">Upload a video file to check if it's real or fake.</p>
+
+        <div class="card mt-4">
+            <div class="card-body">
+                <!-- Form for uploading video -->
+                <form id="uploadForm" action="/predict" method="POST" enctype="multipart/form-data">
+                    <div class="form-group">
+                        <label for="videoUpload">Choose Video File</label>
+                        <input type="file" class="form-control" id="videoUpload" name="video" accept="video/*" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block">Upload and Analyze</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Section to display result -->
+        <div class="mt-5" id="resultSection" style="display: none;">
+            <h3 class="text-center" id="resultMessage"></h3>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('uploadForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            const formData = new FormData(this);
+            const resultSection = document.getElementById('resultSection');
+            const resultMessage = document.getElementById('resultMessage');
+
+            resultMessage.textContent = 'Processing...';
+            resultSection.style.display = 'block';
+
+            fetch('/predict', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    resultMessage.textContent = `Error: ${data.error}`;
+                } else {
+                    resultMessage.textContent = `Result: ${data.result} (Confidence: ${data.confidence.toFixed(2)}%)`;
+                }
+            })
+            .catch(error => {
+                resultMessage.textContent = `Error: ${error.message}`;
+            });
+        });
+    </script>
+</body>
+</html>
